@@ -1,0 +1,41 @@
+{
+  "name": "platform-feed",
+  "version": "0.1.0",
+  "description": "The platform:feed capability — its declaration, its implementation over the runtime's cores, and the conformance suite that holds one to the other",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "s=0; for f in test/conformance.test.js; do bare \"$f\" || s=1; done; exit $s",
+    "typecheck": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AustinPoonia/platform-feed.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AustinPoonia/platform-feed/issues"
+  },
+  "homepage": "https://github.com/AustinPoonia/platform-feed#readme",
+  "exports": {
+    ".": "./index.js",
+    "./feed": "./lib/feed.js",
+    "./declaration": "./lib/declaration.js",
+    "./package": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "vendor.d.ts"
+  ],
+  "dependencies": {
+    "artifact-protocol": "file:../artifact-protocol"
+  },
+  "devDependencies": {
+    "bare-assert": "^1.2.0",
+    "bare-buffer": "^3.6.2",
+    "bare-runtime": "^1.30.3",
+    "bare-tap": "^1.0.0",
+    "typescript": "^5.5.0"
+  }
+}
