@@ -19,7 +19,7 @@ await instance.methods.entries()                    // every member's, in (seq, 
 
 ## Why this is a repository
 
-`ROADMAP.md` Phase 6a, and the rule
+The capability split, and the rule
 `ArtifactPatform/scripts/all-repos.sh --check-doors` enforces: **the kernel wires
 capabilities; it does not implement them.** Six capabilities the runtime supplies
 had their declarations in one file in `artifact-protocol` and their

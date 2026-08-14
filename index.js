@@ -4,7 +4,7 @@
  *
  * ## Why this is its own repository
  *
- * ROADMAP.md Phase 6a: **the kernel wires capabilities; it does not implement
+ * The capability rule is **the kernel wires capabilities; it does not implement
  * them.** Six capabilities the runtime supplies had their declarations in one
  * file in `artifact-protocol` and their implementations spread across four files
  * in the kernel, no two sharing a boundary — so a capability was two documents in
