@@ -309,15 +309,45 @@ test('value is declared any, so the platform refuses nothing an artifact records
   const param = operation('append').params[0]
   assert.equal(param.type, 'any')
 
-  for (const value of [null, 0, false, '', [], { nested: { deep: [1, 2] } }]) {
-    await checked(built, 'append', [value])
-  }
+  const recorded = [null, 0, false, '', [], { nested: { deep: [1, 2] } }]
+  for (const value of recorded) await checked(built, 'append', [value])
 
   const own = await checked(built, 'own', [])
-  assert.equal(own.length, 6)
-  assert.strictEqual(own[0].value, null, 'null is a value an artifact may record')
-  assert.strictEqual(own[2].value, false)
-  assert.equal(JSON.stringify(own[5].value), JSON.stringify({ nested: { deep: [1, 2] } }))
+  assert.equal(own.length, recorded.length)
+
+  // All six, and not the three this case used to sample. `0`, `''` and `[]` went
+  // unasserted, and `[]` is the one that mattered: an `append` that spread the
+  // value on its way into the block — one `{ ...value }` away — writes `{}` there,
+  // and an artifact reading `.length` off the answer gets `undefined` with nothing
+  // anywhere having failed. Composites are compared by canonical encoding,
+  // because `[]` and `{}` encode differently and that is exactly the difference
+  // being watched for; primitives by identity, because `null`, `false`, `''` and
+  // `0` are four values a loose comparison confuses with each other and with
+  // absence.
+  recorded.forEach((value, i) => {
+    if (value === null || typeof value !== 'object') {
+      assert.strictEqual(own[i].value, value,
+        `entry ${i} went in as ${JSON.stringify(value)} and came back as ${JSON.stringify(own[i].value)}`)
+      return
+    }
+    assert.equal(JSON.stringify(own[i].value), JSON.stringify(value), `entry ${i} did not survive the log`)
+    assert.equal(Array.isArray(own[i].value), Array.isArray(value),
+      `entry ${i} changed between an array and an object, which is the loss no encoding shows`)
+  })
+
+  // And the edge that "refuses nothing" hides, stated as a case rather than left
+  // for somebody to discover from a `{}`. A value JSON cannot carry is not
+  // refused *and* does not survive: a `Set` is accepted, written as `{}`, and read
+  // back as `{}`. The loss is real and it is silent, and it belongs to the door
+  // rather than to this capability — `append` serialises with `JSON.stringify`
+  // and there is no second encoding for it to reach for. Asserted so that an
+  // `append` which grew a refusal, and an `append` which grew a richer encoder,
+  // both fail here and have to say which of the two they are.
+  assert.equal(await checked(built, 'append', [new Set(['a'])]), recorded.length,
+    'append refused a value, and the declaration says it refuses nothing')
+  const after = await checked(built, 'own', [])
+  assert.equal(JSON.stringify(after[recorded.length].value), '{}',
+    'a Set now survives the door; the declaration promises any, and JSON is what any means here')
 })
 
 /* ──────────────────── the order, which is the whole rule ────────────────── */
